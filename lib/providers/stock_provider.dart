@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 class StockItem {
+  // вынести в отдельный файл/папку models
   double price;
   final String symbol;
   double volume;
@@ -20,7 +21,7 @@ class StockItem {
 
 class StockProvider with ChangeNotifier {
   final WebSocketChannel _channel;
-  bool isListened = false;
+  bool isListened = false; // сделать приватными
   bool isFetched = false;
 
   StockProvider()
@@ -46,11 +47,8 @@ class StockProvider with ChangeNotifier {
     StockItem(symbol: 'BYND', description: 'BYND')
   ];
 
-  List<StockItem> _renderedStocks = [];
-
-  List<String> get stockNames {
-    return [..._stockNames];
-  }
+  List<StockItem> _renderedStocks =
+      []; // вынести функцию поиска в UI и удалить _renderedStocks
 
   List<StockItem> get stocks {
     return [..._renderedStocks];
@@ -58,11 +56,9 @@ class StockProvider with ChangeNotifier {
 
   void openWebSocket() {
     print('OPEN');
-    for (int i = 0; i < _stockNames.length; i++) {
-      var element = _stockNames[i];
+    _stockNames.forEach((element) {
       _channel.sink.add('{"type":"subscribe","symbol":"$element"}');
-      print(element);
-    }
+    });
   }
 
   Future<String> fetchDataFromApi() async {
@@ -78,15 +74,11 @@ class StockProvider with ChangeNotifier {
         symbol: stockSymbol,
         description: fetchData[i]['description'],
       ));
-      if (i == 229) {
-        _renderedStocks = [..._stocks];
-        openWebSocket();
-        listenStock();
-        notifyListeners();
-        print(_stockNames);
-        print(_stocks);
-      }
     }
+    _renderedStocks = [..._stocks];
+    openWebSocket();
+    listenStock();
+    notifyListeners();
     return "Success";
   }
 
@@ -97,6 +89,7 @@ class StockProvider with ChangeNotifier {
   void listenStock() {
     print('LISTEN');
     if (!isListened) {
+      // перенести проверку в fetchDataFromApi
       isListened = true;
       _channel.stream.listen((data) {
         _stocks
