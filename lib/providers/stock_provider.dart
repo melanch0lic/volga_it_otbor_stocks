@@ -1,42 +1,21 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
 
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
-class StockItem {
-  // вынести в отдельный файл/папку models
-  double price;
-  final String symbol;
-  double volume;
-  final String description;
-
-  StockItem({
-    this.price = 0,
-    this.symbol = 'No data',
-    this.volume = 0,
-    this.description = 'No data',
-  });
-}
+import '../models/stock.dart';
 
 class StockProvider with ChangeNotifier {
   final WebSocketChannel _channel;
   bool isListened = false; // сделать приватными
   bool isFetched = false;
+  String _searchValue = '';
 
   StockProvider()
       : _channel = WebSocketChannel.connect(
           Uri.parse('wss://ws.finnhub.io?token=c8qe2kaad3ienapjk0kg'),
         );
-
-  List<String> _stockNames = [
-    'AAPL',
-    'MSFT',
-    'AMZN',
-    'BINANCE:BTCUSDT',
-    'IC MARKETS:1',
-    'BYND'
-  ];
 
   List<StockItem> _stocks = [
     StockItem(symbol: 'AAPL', description: 'AAPL'),
@@ -54,10 +33,14 @@ class StockProvider with ChangeNotifier {
     return [..._renderedStocks];
   }
 
+  String get searchValue {
+    return _searchValue;
+  }
+
   void openWebSocket() {
     print('OPEN');
-    _stockNames.forEach((element) {
-      _channel.sink.add('{"type":"subscribe","symbol":"$element"}');
+    _stocks.forEach((element) {
+      _channel.sink.add('{"type":"subscribe","symbol":"${element.symbol}"}');
     });
   }
 
@@ -69,7 +52,6 @@ class StockProvider with ChangeNotifier {
 
     for (int i = 200; i < 230; i++) {
       String stockSymbol = fetchData[i]['displaySymbol'];
-      _stockNames.add(stockSymbol);
       _stocks.add(StockItem(
         symbol: stockSymbol,
         description: fetchData[i]['description'],
@@ -106,18 +88,7 @@ class StockProvider with ChangeNotifier {
   }
 
   void searchHandler(String value) {
-    List<StockItem> newStocks = [];
-    if (value == null) {
-      _renderedStocks = [..._stocks];
-      return;
-    }
-    _stocks.forEach((element) {
-      if (element.description.startsWith(value) ||
-          element.symbol.startsWith(value)) {
-        newStocks.add(element);
-      }
-    });
-    _renderedStocks = newStocks;
+    _searchValue = value.toUpperCase();
     notifyListeners();
   }
 }
