@@ -1,13 +1,15 @@
 class StockItem {
-  double price;
-  final String symbol;
-  double volume;
-  final String description;
+  double? lastPrice;
+  double? price;
+  final String? symbol;
+  double? volume;
+  final String? description;
 
   StockItem({
-    this.price = 0,
-    this.symbol = 'No data',
-    this.volume = 0,
+    this.lastPrice,
+    this.price,
+    this.symbol,
+    this.volume,
     this.description = 'No data',
   });
 }

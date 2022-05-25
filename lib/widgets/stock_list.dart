@@ -10,8 +10,8 @@ class StockList extends StatelessWidget {
     final provider = Provider.of<StockProvider>(context);
     final stockList = provider.stocks
         .where((element) =>
-            element.description.startsWith(provider.searchValue) ||
-            element.symbol.startsWith(provider.searchValue))
+            element.description!.startsWith(provider.searchValue) ||
+            element.symbol!.startsWith(provider.searchValue))
         .toList();
     return ListView.separated(
         itemBuilder: (ctx, i) {

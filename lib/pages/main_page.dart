@@ -5,19 +5,31 @@ import 'package:provider/provider.dart';
 import '../providers/stock_provider.dart';
 import '../widgets/stock_list.dart';
 
-class MainPage extends StatelessWidget {
+class MainPage extends StatefulWidget {
+  @override
+  State<MainPage> createState() => _MainPageState();
+}
+
+class _MainPageState extends State<MainPage> {
+  var stockProvider;
+  @override
+  void initState() {
+    stockProvider = Provider.of<StockProvider>(context, listen: false);
+    stockProvider.listenStock();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    stockProvider.closeWebSocket();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final stockProvider = Provider.of<StockProvider>(context);
-    if (!stockProvider.isFetched) {
-      stockProvider
-          .fetchDataFromApi(); // вставить при инициализации конструктора StockProvider
-      // stockProvider.listenStock();
-      stockProvider.isFetched = true;
-    }
     return Scaffold(
         appBar: AppBar(
-          actions: [
+          actions: const [
             IconButton(
                 onPressed: null,
                 icon: Icon(
@@ -35,8 +47,7 @@ class MainPage extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   )),
               Text(
-                DateFormat.yMMMMEEEEd()
-                    .format(DateTime.now()), // поменять отображение времени
+                DateFormat.yMMMMEEEEd().format(DateTime.now()),
                 style: TextStyle(
                   color: Colors.grey[500],
                   fontWeight: FontWeight.bold,
@@ -45,7 +56,6 @@ class MainPage extends StatelessWidget {
             ],
           ),
         ),
-        // поменять на другой виджет
         backgroundColor: Colors.black,
         body: Column(
           children: [
@@ -62,7 +72,6 @@ class MainPage extends StatelessWidget {
                             TextStyle(color: Colors.grey[500], fontSize: 16),
                         hintText: "Search",
                         prefixIcon: const Icon(
-                          // отцентрировать Иконку
                           Icons.search,
                         ),
                         fillColor: Colors.grey[800],

@@ -3,65 +3,95 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
+import '../config.dart';
 
 import '../models/stock.dart';
 
 class StockProvider with ChangeNotifier {
   final WebSocketChannel _channel;
-  bool isListened = false; // сделать приватными
-  bool isFetched = false;
   String _searchValue = '';
 
   StockProvider()
       : _channel = WebSocketChannel.connect(
-          Uri.parse('wss://ws.finnhub.io?token=c8qe2kaad3ienapjk0kg'),
-        );
+          Uri.parse('wss://ws.finnhub.io?token=${Config.token}'),
+        ) {
+    // fetchDataFromApi();
+  }
 
-  List<StockItem> _stocks = [
-    StockItem(symbol: 'AAPL', description: 'AAPL'),
-    StockItem(symbol: 'MSFT', description: 'MSFT'),
-    StockItem(symbol: 'BINANCE:BTCUSDT', description: 'BINANCE:BTCUSDT'),
-    StockItem(symbol: 'IC MARKETS:1', description: 'IC MARKETS:1'),
-    StockItem(symbol: 'AMZN', description: 'AMZN'),
-    StockItem(symbol: 'BYND', description: 'BYND')
+  final List<StockItem> _stocks = [
+    StockItem(symbol: 'AAPL'),
+    StockItem(symbol: 'MSFT'),
+    StockItem(symbol: 'BINANCE:BTCUSDT'),
+    StockItem(symbol: 'IC MARKETS:1'),
+    StockItem(symbol: 'DIS'),
+    StockItem(symbol: 'AMZN'),
+    StockItem(symbol: 'BYND'),
+    StockItem(symbol: 'GOOGL'),
+    StockItem(symbol: 'TSLA'),
+    StockItem(symbol: 'FB'),
+    StockItem(symbol: 'NVDA'),
+    StockItem(symbol: 'NKE'),
+    StockItem(symbol: 'TM'),
+    StockItem(symbol: 'V'),
+    StockItem(symbol: 'PEP'),
+    StockItem(symbol: 'BABA'),
+    StockItem(symbol: 'INTC'),
+    StockItem(symbol: 'KO'),
+    StockItem(symbol: 'WMT'),
+    StockItem(symbol: 'MA'),
   ];
 
-  List<StockItem> _renderedStocks =
-      []; // вынести функцию поиска в UI и удалить _renderedStocks
-
   List<StockItem> get stocks {
-    return [..._renderedStocks];
+    return [..._stocks];
   }
 
   String get searchValue {
     return _searchValue;
   }
 
-  void openWebSocket() {
-    print('OPEN');
-    _stocks.forEach((element) {
-      _channel.sink.add('{"type":"subscribe","symbol":"${element.symbol}"}');
-    });
+  void subStock(StockItem element) {
+    _channel.sink.add('{"type":"subscribe","symbol":"${element.symbol}"}');
+  }
+
+  void unsubStock(StockItem element) {
+    _channel.sink.add('{"type":"usubscribe","symbol":"${element.symbol}"}');
   }
 
   Future<String> fetchDataFromApi() async {
-    var url = Uri.parse(
-        'https://finnhub.io/api/v1/stock/symbol?exchange=US&token=c8qe2kaad3ienapjk0kg');
-    var jsonData = await http.get(url);
-    var fetchData = jsonDecode(jsonData.body);
+    try {
+      var url = Uri.parse(
+          'https://finnhub.io/api/v1/stock/symbol?exchange=US&token=${Config.token}');
+      var jsonData = await http.get(url);
+      var fetchData = jsonDecode(jsonData.body);
 
-    for (int i = 200; i < 230; i++) {
-      String stockSymbol = fetchData[i]['displaySymbol'];
-      _stocks.add(StockItem(
-        symbol: stockSymbol,
-        description: fetchData[i]['description'],
-      ));
+      for (int i = 0; i < 30; i++) {
+        String stockSymbol = fetchData[i]['displaySymbol'];
+        _stocks.add(StockItem(
+          symbol: stockSymbol,
+          description: fetchData[i]['description'],
+        ));
+      }
+    } catch (err) {
+      print('Информация не получена: $err');
+      return "Failure";
     }
-    _renderedStocks = [..._stocks];
-    openWebSocket();
-    listenStock();
-    notifyListeners();
     return "Success";
+  }
+
+  Future<String> getStock(StockItem stock) async {
+    final url = Uri.parse(
+        'https://finnhub.io/api/v1/quote?symbol=${stock.symbol}&token=${Config.token}');
+    try {
+      final response = await http.get(url);
+      if (response.body != null) {
+        stock.price = jsonDecode(response.body)['o'] * 1.0;
+        notifyListeners();
+      }
+    } catch (err) {
+      print(err);
+      return 'Failure';
+    }
+    return 'Success';
   }
 
   void closeWebSocket() {
@@ -69,22 +99,14 @@ class StockProvider with ChangeNotifier {
   }
 
   void listenStock() {
-    print('LISTEN');
-    if (!isListened) {
-      // перенести проверку в fetchDataFromApi
-      isListened = true;
-      _channel.stream.listen((data) {
-        _stocks
-            .firstWhere((el) => el.symbol == jsonDecode(data)['data'][0]['s'])
-            .price = jsonDecode(data)['data'][0]['p'];
-        _stocks
-            .firstWhere((el) => el.symbol == jsonDecode(data)['data'][0]['s'])
-            .volume = jsonDecode(data)['data'][0]['v'];
-        notifyListeners();
-        // print(data);
-        // print(jsonDecode(data)['data'][0]['p']);
-      });
-    }
+    _channel.stream.listen((data) {
+      final receivedData = jsonDecode(data)['data'];
+      _stocks.firstWhere((el) => el.symbol == receivedData[0]['s']).lastPrice =
+          receivedData[0]['p'];
+      _stocks.firstWhere((el) => el.symbol == receivedData[0]['s']).volume =
+          receivedData[0]['v'];
+      notifyListeners();
+    }, onError: (error) => print(error));
   }
 
   void searchHandler(String value) {
