@@ -16,6 +16,7 @@ class _MainPageState extends State<MainPage> {
   void initState() {
     stockProvider = Provider.of<StockProvider>(context, listen: false);
     stockProvider.listenStock();
+    stockProvider.getStocksPrice();
     super.initState();
   }
 

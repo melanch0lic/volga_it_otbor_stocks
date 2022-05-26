@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:test_stock_app/models/company.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import '../config.dart';
 
@@ -92,6 +93,41 @@ class StockProvider with ChangeNotifier {
       return 'Failure';
     }
     return 'Success';
+  }
+
+  Future<Company?> getCompanyInfo(String symbol) async {
+    final url = Uri.parse(
+        'https://finnhub.io/api/v1/stock/profile2?symbol=${symbol}&token=${Config.token}');
+    try {
+      final response = await http.get(url);
+      if (response.body != null) {
+        final jsonData = jsonDecode(response.body);
+        if (jsonData.isEmpty) throw 'Error: Empty json data';
+        return Company(
+          country: jsonData['country'],
+          currency: jsonData['currency'],
+          exchange: jsonData['exchange'],
+          finnhubIndustry: jsonData['finnhubIndustry'],
+          ipo: jsonData['ipo'],
+          logoLink: jsonData['logo'],
+          marketCapitalization: jsonData['marketCapitalization'],
+          companyName: jsonData['name'],
+          phone: jsonData['phone'],
+          shareOutstanding: jsonData['shareOutstanding'],
+          symbol: jsonData['ticker'],
+          webUrl: jsonData['weburl'],
+        );
+      }
+    } catch (err) {
+      print(err);
+      return null;
+    }
+  }
+
+  void getStocksPrice() async {
+    _stocks.forEach((element) async {
+      getStock(element);
+    });
   }
 
   void closeWebSocket() {

@@ -14,6 +14,8 @@ class StockList extends StatelessWidget {
             element.symbol!.startsWith(provider.searchValue))
         .toList();
     return ListView.separated(
+        padding: const EdgeInsets.all(8),
+        physics: const BouncingScrollPhysics(),
         itemBuilder: (ctx, i) {
           return Stock(stockList[i]);
         },
