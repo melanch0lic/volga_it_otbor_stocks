@@ -44,6 +44,7 @@ class _MainPageState extends State<MainPage> {
                   stockProvider.searchHandler(value);
                 },
                 decoration: InputDecoration(
+                    contentPadding: EdgeInsets.only(top: 10),
                     hintStyle: TextStyle(color: Colors.grey[500], fontSize: 16),
                     hintText: "Search Stock...",
                     prefixIcon: const Icon(

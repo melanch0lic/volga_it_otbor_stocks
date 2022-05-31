@@ -19,7 +19,8 @@ class StockDetailsPage extends StatelessWidget {
           color: Color.fromRGBO(9, 10, 12, 1),
         ),
         FutureBuilder(
-            future: Provider.of<StockProvider>(context).getCompanyInfo(symbol),
+            future: Provider.of<StockProvider>(context, listen: false)
+                .getCompanyInfo(symbol),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 Company company = snapshot.data as Company;
@@ -30,7 +31,13 @@ class StockDetailsPage extends StatelessWidget {
                 );
               }
               return Center(
-                child: Text('No Data'),
+                child: Text(
+                  'No Data',
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 24),
+                ),
               );
             }),
         AppBar(

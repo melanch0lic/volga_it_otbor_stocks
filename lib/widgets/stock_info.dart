@@ -16,11 +16,11 @@ class StockInfo extends StatelessWidget {
           elevation: 1,
           color: Color.fromRGBO(59, 64, 67, 1),
           shadowColor: Colors.grey,
-          shape: RoundedRectangleBorder(
+          shape: const RoundedRectangleBorder(
             side: BorderSide(
               color: Colors.black45,
             ),
-            borderRadius: const BorderRadius.all(Radius.circular(12)),
+            borderRadius: BorderRadius.all(Radius.circular(12)),
           ),
           child: Container(
             padding: EdgeInsets.all(16),
@@ -66,6 +66,19 @@ class StockInfo extends StatelessWidget {
                   'Company website: ${company!.webUrl}',
                   style: TextStyle(color: Colors.white),
                 ),
+                Container(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(40),
+                    child: Image.network(
+                      company!.logoLink!,
+                      // errorBuilder: (context, error, stackTrace) =>
+                      //     Image.network(
+                      //   'https://pro2-bar-s3-cdn-cf1.myportfolio.com/595e16db507530aedc596bfea5b9b205/c4942518-4c81-4440-b5e6-a81ee775fccd_car_202x158.gif?h=7f6473aa96778a9138ad4bbdbcdf698d',
+                      // ),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                )
               ],
             ),
           ),
