@@ -13,33 +13,38 @@ class StockDetailsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.white,
-        iconTheme: IconThemeData(color: Colors.black),
-        centerTitle: true,
-        title: Text(
-          'Stock Info',
-          style: TextStyle(
-              fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
+        body: Stack(
+      children: [
+        Container(
+          color: Color.fromRGBO(9, 10, 12, 1),
         ),
-      ),
-      body: FutureBuilder(
-          future: Provider.of<StockProvider>(context).getCompanyInfo(symbol),
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              Company company = snapshot.data as Company;
-              return StockInfo(company);
-            } else if (snapshot.connectionState == ConnectionState.waiting) {
+        FutureBuilder(
+            future: Provider.of<StockProvider>(context).getCompanyInfo(symbol),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                Company company = snapshot.data as Company;
+                return StockInfo(company);
+              } else if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
               return Center(
-                child: CircularProgressIndicator(),
+                child: Text('No Data'),
               );
-            }
-
-            return Center(
-              child: Text('No Data'),
-            );
-          }),
-    );
+            }),
+        AppBar(
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+          iconTheme: IconThemeData(color: Colors.white),
+          centerTitle: true,
+          title: Text(
+            'Stock Info',
+            style: TextStyle(
+                fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+          ),
+        )
+      ],
+    ));
   }
 }
