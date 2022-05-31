@@ -10,7 +10,7 @@ class StockInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 50),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 80),
       child: Center(
         child: Card(
           elevation: 1,
@@ -66,16 +66,20 @@ class StockInfo extends StatelessWidget {
                   'Company website: ${company!.webUrl}',
                   style: TextStyle(color: Colors.white),
                 ),
-                Container(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(40),
-                    child: Image.network(
-                      company!.logoLink!,
-                      // errorBuilder: (context, error, stackTrace) =>
-                      //     Image.network(
-                      //   'https://pro2-bar-s3-cdn-cf1.myportfolio.com/595e16db507530aedc596bfea5b9b205/c4942518-4c81-4440-b5e6-a81ee775fccd_car_202x158.gif?h=7f6473aa96778a9138ad4bbdbcdf698d',
-                      // ),
-                      fit: BoxFit.cover,
+                Center(
+                  child: Container(
+                    height: 120,
+                    width: 120,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(20),
+                      child: Image.network(
+                        company!.logoLink!,
+                        errorBuilder: (context, error, stackTrace) =>
+                            Image.network(
+                          'https://c.tenor.com/IHdlTRsmcS4AAAAC/404.gif',
+                        ),
+                        fit: BoxFit.contain,
+                      ),
                     ),
                   ),
                 )
