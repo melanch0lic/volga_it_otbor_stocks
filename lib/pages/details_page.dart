@@ -30,7 +30,12 @@ class StockDetailsPage extends StatelessWidget {
             if (snapshot.hasData) {
               Company company = snapshot.data as Company;
               return StockInfo(company);
+            } else if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(
+                child: CircularProgressIndicator(),
+              );
             }
+
             return Center(
               child: Text('No Data'),
             );

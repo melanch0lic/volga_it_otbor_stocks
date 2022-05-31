@@ -20,26 +20,26 @@ class StockProvider with ChangeNotifier {
   }
 
   final List<StockItem> _stocks = [
-    StockItem(symbol: 'AAPL'),
-    StockItem(symbol: 'MSFT'),
-    StockItem(symbol: 'BINANCE:BTCUSDT'),
-    StockItem(symbol: 'IC MARKETS:1'),
-    StockItem(symbol: 'DIS'),
-    StockItem(symbol: 'AMZN'),
-    StockItem(symbol: 'BYND'),
-    StockItem(symbol: 'GOOGL'),
-    StockItem(symbol: 'TSLA'),
-    StockItem(symbol: 'FB'),
-    StockItem(symbol: 'NVDA'),
-    StockItem(symbol: 'NKE'),
-    StockItem(symbol: 'TM'),
-    StockItem(symbol: 'V'),
-    StockItem(symbol: 'PEP'),
-    StockItem(symbol: 'BABA'),
-    StockItem(symbol: 'INTC'),
-    StockItem(symbol: 'KO'),
-    StockItem(symbol: 'WMT'),
-    StockItem(symbol: 'MA'),
+    StockItem(symbol: 'AAPL', description: 'Apple Inc'),
+    StockItem(symbol: 'MSFT', description: 'Microsoft Corp'),
+    StockItem(symbol: 'BINANCE:BTCUSDT', description: 'Binance Bitcoin'),
+    StockItem(symbol: 'IC MARKETS:1', description: 'IC markets'),
+    StockItem(symbol: 'DIS', description: 'Walt Disney Co'),
+    StockItem(symbol: 'AMZN', description: 'Amazon.com Inc'),
+    StockItem(symbol: 'BYND', description: 'Beyond Meat Inc'),
+    StockItem(symbol: 'GOOGL', description: 'Alphabet Inc'),
+    StockItem(symbol: 'TSLA', description: 'Tesla Inc'),
+    StockItem(symbol: 'FB', description: 'Meta Platforms Inc'),
+    StockItem(symbol: 'NVDA', description: 'NVIDIA Corp'),
+    StockItem(symbol: 'NKE', description: 'Nike Inc'),
+    StockItem(symbol: 'TM', description: 'Toyota Motor Corp'),
+    StockItem(symbol: 'V', description: 'Visa Inc'),
+    StockItem(symbol: 'PEP', description: 'PepsiCo Inc'),
+    StockItem(symbol: 'BABA', description: 'Alibaba Group Holding Ltd'),
+    StockItem(symbol: 'INTC', description: 'Intel Corp'),
+    StockItem(symbol: 'KO', description: 'Coca-Cola CO'),
+    StockItem(symbol: 'WMT', description: 'Walmart Inc'),
+    StockItem(symbol: 'MA', description: 'Mastercard Inc'),
   ];
 
   List<StockItem> get stocks {
@@ -86,6 +86,7 @@ class StockProvider with ChangeNotifier {
       final response = await http.get(url);
       if (response.body != null) {
         stock.price = jsonDecode(response.body)['o'] * 1.0;
+        stock.lastPrice = jsonDecode(response.body)['o'] * 1.0;
         notifyListeners();
       }
     } catch (err) {
@@ -124,8 +125,8 @@ class StockProvider with ChangeNotifier {
     }
   }
 
-  void getStocksPrice() async {
-    _stocks.forEach((element) async {
+  void getStocksPrice() {
+    _stocks.forEach((element) {
       getStock(element);
     });
   }
@@ -139,8 +140,6 @@ class StockProvider with ChangeNotifier {
       final receivedData = jsonDecode(data)['data'];
       _stocks.firstWhere((el) => el.symbol == receivedData[0]['s']).lastPrice =
           receivedData[0]['p'];
-      _stocks.firstWhere((el) => el.symbol == receivedData[0]['s']).volume =
-          receivedData[0]['v'];
       notifyListeners();
     }, onError: (error) => print(error));
   }
